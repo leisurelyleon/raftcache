@@ -1,0 +1,9 @@
+{
+  "name": "raftcache",
+  "image": "mcr.microsoft.com/devcontainers/rust:1-bookworm",
+  "customizations": {
+    "vscode": {
+      "extensions": ["rust-lang.rust-analyzer"]
+    }
+  }
+}
