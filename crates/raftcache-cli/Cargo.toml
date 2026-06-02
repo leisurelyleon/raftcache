@@ -1,0 +1,18 @@
+[package]
+name = "raftcache-cli"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+description = "Command-line interface for raftcache."
+
+[[bin]]
+name = "raftcache"
+path = "src/main.rs"
+
+[dependencies]
+raftcache-sim = { path = "../raftcache-sim" }
+raftcache-kv = { path = "../raftcache-kv" }
+clap.workspace = true
