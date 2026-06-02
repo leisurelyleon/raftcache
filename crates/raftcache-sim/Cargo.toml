@@ -10,3 +10,10 @@ description = "Deterministic simulation harness for raftcache: virtual network, 
 
 [dependencies]
 raft-core = { path = "../raft-core" }
+
+[dev-dependencies]
+criterion = "0.5"
+
+[[bench]]
+name = "replication"
+harness = false
