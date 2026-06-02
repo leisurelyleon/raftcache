@@ -76,7 +76,10 @@ impl Cluster {
             match action {
                 Action::Send { to, message } => self.network.send(source, to, message, self.time),
                 Action::Apply { index, command } => {
-                    self.applied.entry(source).or_default().insert(index, command);
+                    self.applied
+                        .entry(source)
+                        .or_default()
+                        .insert(index, command);
                 }
             }
         }

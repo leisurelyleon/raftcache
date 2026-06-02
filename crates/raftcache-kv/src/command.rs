@@ -34,7 +34,10 @@ mod tests {
 
     #[test]
     fn set_roundtrips() {
-        let cmd = Command::Set { key: "k".into(), value: "v".into() };
+        let cmd = Command::Set {
+            key: "k".into(),
+            value: "v".into(),
+        };
         let bytes = cmd.encode();
         assert_eq!(Command::decode(&bytes).unwrap(), cmd);
     }

@@ -15,8 +15,6 @@ pub mod types;
 pub use error::CoreError;
 pub use event::{Action, Event};
 pub use log::{Log, LogEntry};
-pub use message::{
-    AppendEntries, AppendEntriesReply, Message, RequestVote, RequestVoteReply,
-};
+pub use message::{AppendEntries, AppendEntriesReply, Message, RequestVote, RequestVoteReply};
 pub use node::{Config, RaftNode};
 pub use types::{LogIndex, NodeId, Role, Term};

@@ -91,7 +91,11 @@ mod tests {
     use super::*;
 
     fn entry(term: Term, index: LogIndex) -> LogEntry {
-        LogEntry { term, index, command: vec![] }
+        LogEntry {
+            term,
+            index,
+            command: vec![],
+        }
     }
 
     #[test]

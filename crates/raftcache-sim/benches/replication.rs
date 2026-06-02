@@ -3,7 +3,7 @@
 
 use std::hint::black_box;
 
-use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion};
+use criterion::{BenchmarkId, Criterion, criterion_group, criterion_main};
 
 use raftcache_sim::Cluster;
 
@@ -21,18 +21,22 @@ fn bench_replication(c: &mut Criterion) {
     let mut group = c.benchmark_group("replicate_batch");
 
     for &proposals in &[10u64, 100, 500] {
-        group.bench_with_input(BenchmarkId::from_parameter(proposals), &proposals, |b, &n| {
-            b.iter(|| {
-                let mut cluster = Cluster::new(3);
-                run_until_leader(&mut cluster, 50);
-                for i in 0..n {
-                    cluster.propose(i.to_le_bytes().to_vec());
-                    cluster.run(4); // let each proposal replicate
-                }
-                cluster.run(20); // drain remaining replication
-                black_box(cluster.leader())
-            });
-        });
+        group.bench_with_input(
+            BenchmarkId::from_parameter(proposals),
+            &proposals,
+            |b, &n| {
+                b.iter(|| {
+                    let mut cluster = Cluster::new(3);
+                    run_until_leader(&mut cluster, 50);
+                    for i in 0..n {
+                        cluster.propose(i.to_le_bytes().to_vec());
+                        cluster.run(4); // let each proposal replicate
+                    }
+                    cluster.run(20); // drain remaining replication
+                    black_box(cluster.leader())
+                });
+            },
+        );
     }
 
     group.finish();

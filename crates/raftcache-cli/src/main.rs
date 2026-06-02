@@ -37,8 +37,11 @@ fn store_for(cluster: &Cluster, node: NodeId) -> KvStore {
 fn print_kv_state(cluster: &Cluster) {
     for id in cluster.node_ids() {
         let store = store_for(cluster, id);
-        let pairs: Vec<String> =
-            store.pairs().into_iter().map(|(k, v)| format!("{k}={v}")).collect();
+        let pairs: Vec<String> = store
+            .pairs()
+            .into_iter()
+            .map(|(k, v)| format!("{k}={v}"))
+            .collect();
         println!("  node {id}: {{ {} }}", pairs.join(", "));
     }
 }
@@ -49,15 +52,29 @@ fn run_demo() {
     println!("== Election ==");
     run_until_leader(&mut cluster, 50);
     match cluster.leader() {
-        Some(leader) => println!("Leader elected: node {leader} (term {})",
-                                 cluster.term_of(leader).unwrap_or(0)),
+        Some(leader) => println!(
+            "Leader elected: node {leader} (term {})",
+            cluster.term_of(leader).unwrap_or(0)
+        ),
         None => println!("No leader elected within the tick budget."),
     }
 
     println!("\n== Replication ==");
-    cluster.propose(KvCommand::Set { key: "alpha".into(), value: "1".into() }.encode());
+    cluster.propose(
+        KvCommand::Set {
+            key: "alpha".into(),
+            value: "1".into(),
+        }
+        .encode(),
+    );
     cluster.run(20);
-    cluster.propose(KvCommand::Set { key: "beta".into(), value: "2".into() }.encode());
+    cluster.propose(
+        KvCommand::Set {
+            key: "beta".into(),
+            value: "2".into(),
+        }
+        .encode(),
+    );
     cluster.run(20);
     println!("Replicated key-value state across the cluster:");
     print_kv_state(&cluster);
@@ -78,8 +95,10 @@ fn run_demo() {
     cluster.heal();
     cluster.run(40);
     if let Some(leader) = cluster.leader() {
-        println!("Cluster healed; leader is node {leader} (term {})",
-                 cluster.term_of(leader).unwrap_or(0));
+        println!(
+            "Cluster healed; leader is node {leader} (term {})",
+            cluster.term_of(leader).unwrap_or(0)
+        );
     }
 
     println!("\n== Safety checks ==");

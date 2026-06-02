@@ -48,7 +48,10 @@ impl KvStore {
 
     /// A sorted snapshot of the key-value pairs (for display).
     pub fn pairs(&self) -> Vec<(String, String)> {
-        self.map.iter().map(|(k, v)| (k.clone(), v.clone())).collect()
+        self.map
+            .iter()
+            .map(|(k, v)| (k.clone(), v.clone()))
+            .collect()
     }
 }
 
@@ -59,7 +62,13 @@ mod tests {
     #[test]
     fn set_then_get() {
         let mut store = KvStore::new();
-        store.apply(1, &Command::Set { key: "a".into(), value: "1".into() });
+        store.apply(
+            1,
+            &Command::Set {
+                key: "a".into(),
+                value: "1".into(),
+            },
+        );
         assert_eq!(store.get("a"), Some(&"1".to_string()));
         assert_eq!(store.applied_index(), 1);
     }
@@ -67,7 +76,13 @@ mod tests {
     #[test]
     fn delete_removes_key() {
         let mut store = KvStore::new();
-        store.apply(1, &Command::Set { key: "a".into(), value: "1".into() });
+        store.apply(
+            1,
+            &Command::Set {
+                key: "a".into(),
+                value: "1".into(),
+            },
+        );
         store.apply(2, &Command::Delete { key: "a".into() });
         assert_eq!(store.get("a"), None);
         assert_eq!(store.applied_index(), 2);
@@ -76,8 +91,14 @@ mod tests {
     #[test]
     fn same_command_sequence_is_deterministic() {
         let cmds = [
-            Command::Set { key: "a".into(), value: "1".into() },
-            Command::Set { key: "b".into(), value: "2".into() },
+            Command::Set {
+                key: "a".into(),
+                value: "1".into(),
+            },
+            Command::Set {
+                key: "b".into(),
+                value: "2".into(),
+            },
             Command::Delete { key: "a".into() },
         ];
         let mut first = KvStore::new();

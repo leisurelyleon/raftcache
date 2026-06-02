@@ -6,9 +6,7 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use crate::event::{Action, Event};
 use crate::log::{Log, LogEntry};
-use crate::message::{
-    AppendEntries, AppendEntriesReply, Message, RequestVote, RequestVoteReply,
-};
+use crate::message::{AppendEntries, AppendEntriesReply, Message, RequestVote, RequestVoteReply};
 use crate::types::{LogIndex, NodeId, Role, Term};
 
 /// Timeout configuration, in logical ticks.
@@ -358,7 +356,11 @@ impl RaftNode {
     }
 
     fn build_append_entries(&self, to: NodeId) -> Message {
-        let next = self.next_index.get(&to).copied().unwrap_or(self.log.last_index() + 1);
+        let next = self
+            .next_index
+            .get(&to)
+            .copied()
+            .unwrap_or(self.log.last_index() + 1);
         let prev_log_index = next.saturating_sub(1);
         let prev_log_term = self.log.term_at(prev_log_index).unwrap_or(0);
         let entries = self.log.entries_from(next).to_vec();
@@ -403,7 +405,10 @@ mod tests {
     use super::*;
 
     fn cfg() -> Config {
-        Config { election_timeout: 3, heartbeat_timeout: 1 }
+        Config {
+            election_timeout: 3,
+            heartbeat_timeout: 1,
+        }
     }
 
     fn node() -> RaftNode {
@@ -411,7 +416,10 @@ mod tests {
     }
 
     fn count_sends(actions: &[Action]) -> usize {
-        actions.iter().filter(|a| matches!(a, Action::Send { .. })).count()
+        actions
+            .iter()
+            .filter(|a| matches!(a, Action::Send { .. }))
+            .count()
     }
 
     #[test]
@@ -445,7 +453,10 @@ mod tests {
             }),
         });
         match &actions[0] {
-            Action::Send { message: Message::RequestVoteReply(r), .. } => {
+            Action::Send {
+                message: Message::RequestVoteReply(r),
+                ..
+            } => {
                 assert!(r.vote_granted);
             }
             _ => panic!("expected a vote reply"),
@@ -461,10 +472,19 @@ mod tests {
             last_log_index: 0,
             last_log_term: 0,
         };
-        n.step(Event::Message { from: 1, message: Message::RequestVote(rv(1)) });
-        let actions = n.step(Event::Message { from: 2, message: Message::RequestVote(rv(2)) });
+        n.step(Event::Message {
+            from: 1,
+            message: Message::RequestVote(rv(1)),
+        });
+        let actions = n.step(Event::Message {
+            from: 2,
+            message: Message::RequestVote(rv(2)),
+        });
         match &actions[0] {
-            Action::Send { message: Message::RequestVoteReply(r), .. } => {
+            Action::Send {
+                message: Message::RequestVoteReply(r),
+                ..
+            } => {
                 assert!(!r.vote_granted);
             }
             _ => panic!("expected a vote reply"),
@@ -482,7 +502,11 @@ mod tests {
                 leader_id: 9,
                 prev_log_index: 0,
                 prev_log_term: 0,
-                entries: vec![LogEntry { term: 2, index: 1, command: vec![] }],
+                entries: vec![LogEntry {
+                    term: 2,
+                    index: 1,
+                    command: vec![],
+                }],
                 leader_commit: 0,
             }),
         });
@@ -497,7 +521,10 @@ mod tests {
             }),
         });
         match &actions[0] {
-            Action::Send { message: Message::RequestVoteReply(r), .. } => {
+            Action::Send {
+                message: Message::RequestVoteReply(r),
+                ..
+            } => {
                 assert!(!r.vote_granted);
             }
             _ => panic!("expected a vote reply"),
@@ -512,7 +539,10 @@ mod tests {
         n.step(Event::Tick); // now candidate, term 1
         let actions = n.step(Event::Message {
             from: 1,
-            message: Message::RequestVoteReply(RequestVoteReply { term: 1, vote_granted: true }),
+            message: Message::RequestVoteReply(RequestVoteReply {
+                term: 1,
+                vote_granted: true,
+            }),
         });
         assert_eq!(n.role(), Role::Leader);
         assert_eq!(count_sends(&actions), 2); // initial heartbeats
@@ -525,7 +555,10 @@ mod tests {
         n.step(Event::Tick);
         n.step(Event::Message {
             from: 1,
-            message: Message::RequestVoteReply(RequestVoteReply { term: 1, vote_granted: true }),
+            message: Message::RequestVoteReply(RequestVoteReply {
+                term: 1,
+                vote_granted: true,
+            }),
         });
         n
     }
@@ -554,7 +587,11 @@ mod tests {
             }),
         });
         assert_eq!(n.commit_index(), 1);
-        assert!(actions.iter().any(|a| matches!(a, Action::Apply { index: 1, .. })));
+        assert!(
+            actions
+                .iter()
+                .any(|a| matches!(a, Action::Apply { index: 1, .. }))
+        );
     }
 
     #[test]
@@ -567,13 +604,20 @@ mod tests {
                 leader_id: 1,
                 prev_log_index: 0,
                 prev_log_term: 0,
-                entries: vec![LogEntry { term: 1, index: 1, command: vec![] }],
+                entries: vec![LogEntry {
+                    term: 1,
+                    index: 1,
+                    command: vec![],
+                }],
                 leader_commit: 0,
             }),
         });
         assert_eq!(n.log_last_index(), 1);
         match &actions[0] {
-            Action::Send { message: Message::AppendEntriesReply(r), .. } => {
+            Action::Send {
+                message: Message::AppendEntriesReply(r),
+                ..
+            } => {
                 assert!(r.success);
                 assert_eq!(r.match_index, 1);
             }
@@ -596,7 +640,10 @@ mod tests {
             }),
         });
         match &actions[0] {
-            Action::Send { message: Message::AppendEntriesReply(r), .. } => assert!(!r.success),
+            Action::Send {
+                message: Message::AppendEntriesReply(r),
+                ..
+            } => assert!(!r.success),
             _ => panic!("expected an append reply"),
         }
     }
@@ -611,12 +658,20 @@ mod tests {
                 leader_id: 1,
                 prev_log_index: 0,
                 prev_log_term: 0,
-                entries: vec![LogEntry { term: 1, index: 1, command: vec![42] }],
+                entries: vec![LogEntry {
+                    term: 1,
+                    index: 1,
+                    command: vec![42],
+                }],
                 leader_commit: 1,
             }),
         });
         assert_eq!(n.commit_index(), 1);
-        assert!(actions.iter().any(|a| matches!(a, Action::Apply { index: 1, .. })));
+        assert!(
+            actions
+                .iter()
+                .any(|a| matches!(a, Action::Apply { index: 1, .. }))
+        );
     }
 
     #[test]

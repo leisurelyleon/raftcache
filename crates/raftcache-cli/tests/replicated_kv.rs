@@ -34,13 +34,25 @@ fn replicated_kv_state_agrees_across_nodes() {
 
     // Apply a sequence of real KV commands through consensus.
     let commands = [
-        Command::Set { key: "alpha".into(), value: "1".into() },
-        Command::Set { key: "beta".into(), value: "2".into() },
-        Command::Set { key: "alpha".into(), value: "updated".into() },
+        Command::Set {
+            key: "alpha".into(),
+            value: "1".into(),
+        },
+        Command::Set {
+            key: "beta".into(),
+            value: "2".into(),
+        },
+        Command::Set {
+            key: "alpha".into(),
+            value: "updated".into(),
+        },
         Command::Delete { key: "beta".into() },
     ];
     for command in &commands {
-        assert!(cluster.propose(command.encode()), "leader should accept the proposal");
+        assert!(
+            cluster.propose(command.encode()),
+            "leader should accept the proposal"
+        );
         cluster.run(8);
     }
     cluster.run(20); // drain replication
@@ -56,7 +68,9 @@ fn replicated_kv_state_agrees_across_nodes() {
     assert_eq!(reference.get("alpha"), Some(&"updated".to_string()));
     assert_eq!(reference.get("beta"), None);
 
-    cluster.check_applied_consistency().expect("no divergent committed entries");
+    cluster
+        .check_applied_consistency()
+        .expect("no divergent committed entries");
 }
 
 #[test]
@@ -65,7 +79,15 @@ fn committed_entries_survive_leader_partition() {
     run_until_leader(&mut cluster, 50);
 
     // Commit an entry cluster-wide.
-    assert!(cluster.propose(Command::Set { key: "durable".into(), value: "yes".into() }.encode()));
+    assert!(
+        cluster.propose(
+            Command::Set {
+                key: "durable".into(),
+                value: "yes".into()
+            }
+            .encode()
+        )
+    );
     cluster.run(15);
 
     // Partition the leader; the majority must continue and re-elect.
@@ -74,16 +96,30 @@ fn committed_entries_survive_leader_partition() {
     cluster.run(40);
 
     // Propose more on the majority side.
-    assert!(cluster.propose(Command::Set { key: "after".into(), value: "heal".into() }.encode()));
+    assert!(
+        cluster.propose(
+            Command::Set {
+                key: "after".into(),
+                value: "heal".into()
+            }
+            .encode()
+        )
+    );
     cluster.run(20);
 
     cluster.heal();
     cluster.run(40);
 
     // Safety holds, and the originally-committed entry is intact everywhere.
-    cluster.check_applied_consistency().expect("no divergence across partition/heal");
+    cluster
+        .check_applied_consistency()
+        .expect("no divergence across partition/heal");
     for id in cluster.node_ids() {
         let store = store_for(&cluster, id);
-        assert_eq!(store.get("durable"), Some(&"yes".to_string()), "node {id} lost a committed entry");
+        assert_eq!(
+            store.get("durable"),
+            Some(&"yes".to_string()),
+            "node {id} lost a committed entry"
+        );
     }
 }

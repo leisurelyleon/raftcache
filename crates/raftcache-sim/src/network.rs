@@ -22,7 +22,11 @@ pub struct VirtualNetwork {
 
 impl VirtualNetwork {
     pub fn new(delay: u64) -> Self {
-        Self { queue: Vec::new(), isolated: BTreeSet::new(), delay }
+        Self {
+            queue: Vec::new(),
+            isolated: BTreeSet::new(),
+            delay,
+        }
     }
 
     /// Two nodes are connected iff they are on the same side of the partition
@@ -33,7 +37,12 @@ impl VirtualNetwork {
 
     /// Enqueues a message for delivery at `now + delay`.
     pub fn send(&mut self, from: NodeId, to: NodeId, message: Message, now: u64) {
-        self.queue.push(InFlight { from, to, message, deliver_at: now + self.delay });
+        self.queue.push(InFlight {
+            from,
+            to,
+            message,
+            deliver_at: now + self.delay,
+        });
     }
 
     /// Removes and returns every message due at or before `now` whose link is
@@ -70,7 +79,10 @@ mod tests {
     use raft_core::{Message, RequestVoteReply};
 
     fn msg() -> Message {
-        Message::RequestVoteReply(RequestVoteReply { term: 1, vote_granted: true })
+        Message::RequestVoteReply(RequestVoteReply {
+            term: 1,
+            vote_granted: true,
+        })
     }
 
     #[test]
