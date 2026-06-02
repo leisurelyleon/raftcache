@@ -1,0 +1,13 @@
+[package]
+name = "raft-core"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+description = "Pure, event-driven Raft consensus state machine (no I/O, no time, no threads)."
+
+[dependencies]
+serde.workspace = true
+thiserror.workspace = true
